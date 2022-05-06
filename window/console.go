@@ -68,18 +68,6 @@ func (c ConsoleObject) Time(label ...interface{}) {
 	}
 }
 
-func (c ConsoleObject) TimeLog(label ...interface{}, data ...interface{}) {
-	if len(label) > 0 {
-		if len(data) > 0 {
-			c.AsValue().Call("timeLog", label[0], data...)
-		} else {
-			c.AsValue().Call("timeLog", label[0])
-		}
-	} else {
-		c.AsValue().Call("timeLog")
-	}
-}
-
 func (c ConsoleObject) TimeEnd(label ...interface{}) {
 	if len(label) > 0 {
 		c.AsValue().Call("timeEnd", label[0])
