@@ -13,7 +13,7 @@ Here are some commonly used examples. For more, you can review the [tests](./tes
 console.log("This is a example")
 ```
 
-**In Go**:
+**In Go (with `weco/window`)**:
 ```go
 package main
 
