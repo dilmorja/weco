@@ -2,8 +2,6 @@ package main
 
 import(
 	"flag"
-	"os"
-	"os/exec"
 	"runtime"
 	"log"
 	"path/filepath"
@@ -11,26 +9,10 @@ import(
 	"net/http"
 )
 
-// tool subcommands
-var(
-	testCmd = flag.NewFlagSet("test", flag.ExitOnError)
-)
-
-// testCmd subcommand flags
-var(
-	testInput = testCmd.String("i", "", "input file path")
-	testOutput = testCmd.String("o", "", "output file path")
-)
+var wasmPath string
 
 func init() {
-
-	switch os.Args[1] {
-	case "test":
-		testCmd.Parse(os.Args[2:])
-	default:
-		flag.Usage()
-	}
-
+	flag.StringVar(&wasmPath, "i", "", "Path to WASM")
 	flag.Parse()
 }
 
@@ -68,60 +50,13 @@ const testHTML string = `<!DOCTYPE html>
 </body>
 </html>`
 
-func test() {
-	if *testInput != "" && *testOutput != "" {
-		// save the GOOS and the GOARCH
-		actualOs, actualArch := runtime.GOOS, runtime.GOARCH
-
-		if actualOs == "js" && actualArch == "wasm" {
-			println("Your OS (js) and architecture (wasm) do not match the specifications of your computer.")
-			os.Exit(2)
-		}
-
-		log.Println("[VERIFYING] environment")
-		if actualOs != "js" && actualArch != "wasm" {
-			log.Println("[SETTING] environment")
-			envCMD := exec.Command("go", "env", "-w", "GOOS=js", "GOARCH=wasm")
-			envCMD.Stdout = os.Stdout
-			err := envCMD.Run()
-			if err != nil {
-				log.Fatal("[FAILED] setting environment:\n\t", err)
-			}
-		}
-
-		log.Println("[BUILDING] wasm")
-		buildCMD := exec.Command("go", "build", "-o", filepath.Join(*testOutput), filepath.Join(*testInput))
-		buildCMD.Stdout = os.Stdout
-		err := buildCMD.Run()
-		if err != nil {
-			log.Fatal("[FAILED] building wasm:\n\t", err)
-		}
-
-		if actualOs != "js" && actualArch != "wasm" {
-			log.Println("[RESTORING] environment")
-			restoreEnvCMD := exec.Command("go", "env", "-w", "GOOS="+actualOs, "GOARCH="+actualArch)
-			restoreEnvCMD.Stdout = os.Stdout
-			err = restoreEnvCMD.Run()
-			if err != nil {
-				log.Fatal("[FAILED] restoring environment:\n\t", err)
-			}
-		}
-
-		log.Println("[SERVER] Starting...")
-		testServer(filepath.Join(runtime.GOROOT(), "misc", "wasm", "wasm_exec.js"), *testOutput)
-
-	} else {
-		testCmd.Usage()
-	}
-}
-
 func testServer(wasmexec string, gowasm string) {
 
 	http.HandleFunc("/", func(res http.ResponseWriter, req *http.Request) {
 		t, err := template.New("home").Parse(testHTML)
 
 		if err != nil {
-			panic(err)
+			log.Fatal(err)
 		}
 
 		t.Execute(res, nil)
@@ -136,7 +71,15 @@ func testServer(wasmexec string, gowasm string) {
 	})
 
 	log.Println("[SERVER] Started on http://localhost:9090")
-	http.ListenAndServe(":9090", nil)
+	log.Fatal(http.ListenAndServe(":9090", nil))
 }
 
-func main() {}
+func main() {
+
+	if wasmPath == "" {
+		log.Fatal("Invalid path to WASM")
+	}
+
+	testServer(filepath.Join(runtime.GOROOT(),
+		"misc", "wasm", "wasm_exec.js"), wasmPath)
+}
