@@ -11,12 +11,19 @@ import(
 var w = Global().Get("window")
 
 var(
+	// Returns a boolean true if a window is closed.
 	Closed = w.Get("closed").Bool()
+	// Returns the Console Object for the window.
+	// See also https://www.w3schools.com/jsref/obj_console.asp
 	Console = ConsoleObject(w.Get("console"))
-	FrameElement = w.Get("frameElement")
-	Frames = w.Get("frames")
-	// https://www.w3schools.com/jsref/prop_win_document.asp
+	// Returns the Document object for the window.
+	// See also https://www.w3schools.com/jsref/dom_obj_document.asp
 	Document = w.Get("document")
-	// https://www.w3schools.com/jsref/obj_history.asp
+	// Returns the frame in which the window runs.
+	FrameElement = w.Get("frameElement")
+	// Returns all window objects running in the window.
+	Frames = w.Get("frames")
+	// Returns the History object for the window.
+	// See also https://www.w3schools.com/jsref/obj_history.asp
 	History = HistoryObject(w.Get("history"))
 )
