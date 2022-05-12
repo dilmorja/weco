@@ -17,4 +17,6 @@ var(
 	Frames = w.Get("frames")
 	// https://www.w3schools.com/jsref/prop_win_document.asp
 	Document = w.Get("document")
+	// https://www.w3schools.com/jsref/obj_history.asp
+	History = HistoryObject(w.Get("history"))
 )
