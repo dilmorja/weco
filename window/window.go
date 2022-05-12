@@ -1,3 +1,7 @@
+// Copyright (c) 2022, Daniel M. Jaén
+// All rights reserved.
+
+// https://www.w3schools.com/jsref/obj_window.asp
 package window
 
 import(
